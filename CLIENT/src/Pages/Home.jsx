@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 function Home() {
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
-  const [language, setLanguage] = useState("javascript");
+  const [language, setLanguage] = useState("C++");
   const [isJoin, setIsJoin] = useState(false);
   const [error, setError] = useState("");
 
