@@ -1,22 +1,49 @@
-function UsersPanel({ users, typingUser }) {
+import { FaCircle } from "react-icons/fa";
+
+function UsersPanel({ users = [] }) {
   return (
-    <aside className="bg-slate-800 border-b lg:border-b-0 lg:border-r border-slate-700 p-3 max-h-48 lg:max-h-none overflow-auto order-2 lg:order-none">
-      <h2 className="text-xs uppercase tracking-wide text-slate-400 mb-2">
-        Connected ({users.length})
-      </h2>
+    <div className="h-full flex flex-col bg-slate-900">
 
-      <ul className="space-y-1">
-        {users.map((user, i) => (
-          <li key={i}>👤 {user}</li>
-        ))}
-      </ul>
+      {/* Users List */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
 
-      {typingUser && (
-        <p className="text-xs italic text-slate-400 mt-3">
-          ✍️ {typingUser} is typing...
-        </p>
-      )}
-    </aside>
+        {users.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-slate-500">
+            No users connected
+          </div>
+        ) : (
+          users.map((user, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-3 bg-slate-800 hover:bg-slate-700 rounded-xl px-3 py-2 transition"
+            >
+
+              {/* Avatar */}
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white">
+                {user.charAt(0).toUpperCase()}
+              </div>
+
+              {/* User Info */}
+              <div className="flex-1">
+
+                <p className="font-medium text-white truncate">
+                  {user}
+                </p>
+
+                <div className="flex items-center gap-2 text-xs text-green-400">
+                  <FaCircle className="text-[7px]" />
+                  Online
+                </div>
+
+              </div>
+
+            </div>
+          ))
+        )}
+
+      </div>
+
+    </div>
   );
 }
 
