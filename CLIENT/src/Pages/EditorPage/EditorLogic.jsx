@@ -1,9 +1,10 @@
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { socket } from "../../services/socket";
+import { socket } from "../../Services/socket";
 
 function EditorLogic() {
   const typingTimeout = useRef(null);
+  const bannerTimeout = useRef(null);
 
   const { roomId } = useParams();
   const location = useLocation();
@@ -14,17 +15,25 @@ function EditorLogic() {
   // =========================
   // States
   // =========================
-  const [code, setCode] = useState("");
+
+const [code, setCode] = useState(() => {
+  return localStorage.getItem(`code-${roomId}`) || "";
+});
 
   const [language, setLanguage] = useState(
     initialLanguage?.toLowerCase() || "cpp"
   );
 
-  const [theme, setTheme] = useState("vs-dark");
+  const [theme, setTheme] =useState("vs-dark");
 
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [typingUser, setTypingUser] = useState("");
+
+  // Chat Notification
+  const [chatBanner, setChatBanner] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
@@ -35,16 +44,16 @@ function EditorLogic() {
   // =========================
   // Socket Connection
   // =========================
+
   useEffect(() => {
     if (!username) {
       navigate("/");
       return;
     }
-
-    socket.connect();
+    
 
     socket.off("receive-code");
-    socket.off("update-users");
+    socket.off("users-update");
     socket.off("receive-message");
     socket.off("typing");
     socket.off("receive-language");
@@ -54,18 +63,36 @@ function EditorLogic() {
       username,
     });
 
+    // Code Sync
     socket.on("receive-code", (newCode) => {
       setCode(newCode);
     });
 
-    socket.on("update-users", (updatedUsers) => {
+    // Users
+    socket.on("users-update", (updatedUsers) => {
       setUsers(updatedUsers);
     });
 
+    // Chat
     socket.on("receive-message", (message) => {
       setMessages((prev) => [...prev, message]);
+
+      if (!isChatOpen) {
+        setUnreadCount((prev) => prev + 1);
+        setChatBanner(message);
+
+        if (bannerTimeout.current) {
+          clearTimeout(bannerTimeout.current);
+        }
+
+        bannerTimeout.current = setTimeout(() => {
+          setChatBanner(null);
+        }, 3000);
+      }
+      
     });
 
+    // Typing
     socket.on("typing", (user) => {
       setTypingUser(user);
 
@@ -78,6 +105,7 @@ function EditorLogic() {
       }, 1500);
     });
 
+    // Language
     socket.on("receive-language", (lang) => {
       setLanguage(lang);
     });
@@ -86,7 +114,7 @@ function EditorLogic() {
       socket.emit("leave-room", { roomId });
 
       socket.off("receive-code");
-      socket.off("update-users");
+      socket.off("users-update");
       socket.off("receive-message");
       socket.off("typing");
       socket.off("receive-language");
@@ -95,13 +123,22 @@ function EditorLogic() {
         clearTimeout(typingTimeout.current);
       }
 
-      socket.disconnect();
+      if (bannerTimeout.current) {
+        clearTimeout(bannerTimeout.current);
+      }
     };
-  }, [roomId, username, navigate]);
+  }, [roomId, username, navigate, isChatOpen]);
+  
+  useEffect(() => {
+  if (!roomId) return;
+
+  localStorage.setItem(`code-${roomId}`, code);
+}, [code, roomId]);
 
   // =========================
   // Battle Timer
   // =========================
+
   useEffect(() => {
     if (!battleMode) return;
 
@@ -111,8 +148,9 @@ function EditorLogic() {
 
     return () => clearInterval(timer);
   }, [battleMode]);
+
   // =========================
-  // Editor Handlers
+  // Editor
   // =========================
 
   const handleCodeChange = (value) => {
@@ -175,40 +213,36 @@ function EditorLogic() {
     setOutput("Running...");
 
     const languageMap = {
-      javascript: "nodejs",
+      javascript: "javascript",
       python: "python3",
-      java: "java",
       cpp: "cpp17",
       c: "c",
+      java: "java",
       php: "php",
     };
 
     try {
-      const response = await fetch("http://localhost:5000/run", {
+      const response = await fetch("http://localhost:5000/api/code/run", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          code,
           language: languageMap[language],
+          code,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to execute code");
-      }
-
       const data = await response.json();
 
-      setOutput(
-        data.output ||
-        data.error ||
-        "No Output"
-      );
-    } catch (error) {
-      console.error(error);
-      setOutput("Error running code.");
+      if (!response.ok) {
+        setOutput(data.error || "Execution Failed");
+        return;
+      }
+
+      setOutput(data.output || "No Output");
+    } catch (err) {
+      setOutput(err.message);
     } finally {
       setRunning(false);
     }
@@ -237,7 +271,7 @@ function EditorLogic() {
   };
 
   // =========================
-  // Battle Mode
+  // Battle
   // =========================
 
   const handleStartBattle = () => {
@@ -251,7 +285,7 @@ function EditorLogic() {
   };
 
   // =========================
-  // Leave Room
+  // Leave
   // =========================
 
   const handleLeave = () => {
@@ -260,7 +294,7 @@ function EditorLogic() {
   };
 
   // =========================
-  // Export Everything
+  // Export
   // =========================
 
   return {
@@ -278,7 +312,13 @@ function EditorLogic() {
     battleMode,
     timeLeft,
 
+    chatBanner,
+    unreadCount,
+    isChatOpen,
+
     setTheme,
+    setIsChatOpen,
+    setUnreadCount,
 
     handleCodeChange,
     handleLanguageChange,

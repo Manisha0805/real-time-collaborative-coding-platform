@@ -68,8 +68,7 @@ function Home() {
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSubmit();
           }}
-          className="w-full mb-4 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        />
+className="w-full mb-4 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"        />
 
         <div className="flex rounded-xl overflow-hidden mb-4 border border-slate-700">
 
@@ -81,7 +80,7 @@ function Home() {
             className={`flex-1 py-3 transition ${
               !isJoin
                 ? "bg-cyan-500 text-black font-semibold"
-                : "bg-slate-800 hover:bg-slate-700"
+                : "bg-slate-800 hover:bg-slate-700  text-white"
             }`}
           >
             Create Room
@@ -94,8 +93,8 @@ function Home() {
             }}
             className={`flex-1 py-3 transition ${
               isJoin
-                ? "bg-cyan-500 text-black font-semibold"
-                : "bg-slate-800 hover:bg-slate-700"
+                ? "bg-cyan-500 text-black font-semibold "
+                : "bg-slate-800 hover:bg-slate-700 text-white"
             }`}
           >
             Join Room
@@ -119,14 +118,13 @@ function Home() {
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSubmit();
             }}
-            className="w-full mb-4 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          />
+ className="w-full mb-4 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-cyan-500"          />
         )}
 
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="w-full mb-4 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          className="w-full mb-4 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
         >
           <option value="javascript">JavaScript</option>
           <option value="cpp">C++</option>

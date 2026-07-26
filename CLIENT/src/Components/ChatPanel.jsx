@@ -48,28 +48,26 @@ function ChatPanel({ messages = [], onSend, typingUser }) {
       </div>
 
       {/* Input */}
-      <form
-        onSubmit={submit}
-        className="border-t border-slate-700 p-3"
-      >
-        <div className="flex gap-2">
+    <form
+  onSubmit={submit}
+  className="border-t border-slate-700 p-2 w-full"
+>
+  <div className="flex items-center gap-2 w-full">
+    <input
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+      placeholder="Type..."
+      className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+    />
 
-          <input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 outline-none focus:border-blue-500"
-          />
-
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-500 px-4 rounded-lg transition"
-          >
-            <FaPaperPlane />
-          </button>
-
-        </div>
-      </form>
+    <button
+      type="submit"
+      className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-500 rounded-lg transition"
+    >
+      <FaPaperPlane size={14} />
+    </button>
+  </div>
+</form>
 
     </div>
   );

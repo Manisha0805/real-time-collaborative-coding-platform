@@ -19,15 +19,15 @@ function UsersPanel({ users = [] }) {
             >
 
               {/* Avatar */}
-              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white">
-                {user.charAt(0).toUpperCase()}
-              </div>
+<div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white">
+  {user.username?.charAt(0).toUpperCase()}
+</div>
 
               {/* User Info */}
               <div className="flex-1">
 
                 <p className="font-medium text-white truncate">
-                  {user}
+                  {user.username}
                 </p>
 
                 <div className="flex items-center gap-2 text-xs text-green-400">
