@@ -9,8 +9,15 @@ import {
 } from "react-icons/fa";
 import { useState, useEffect } from "react";
 
-function OutputPanel({ output, running, clearOutput }) {
-  const [copied, setCopied] = useState(false);
+function OutputPanel({
+  output,
+  running,
+  clearOutput,
+  input,
+  setInput,
+}) 
+{
+    const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
   // Auto expand while running or when output arrives
@@ -85,25 +92,51 @@ function OutputPanel({ output, running, clearOutput }) {
       </div>
 
       {/* Expandable Output */}
-      {expanded && (
-        <div className="h-52 bg-black overflow-auto">
+      {/* Expandable Output */}
+{expanded && (
+  <div className="bg-black overflow-auto">
 
-          {running ? (
-            <div className="p-4 text-yellow-400 animate-pulse">
-              Executing your program...
-            </div>
-          ) : output ? (
-            <pre className="p-4 text-green-400 whitespace-pre-wrap break-words font-mono">
-              {output}
-            </pre>
-          ) : (
-            <div className="h-full flex items-center justify-center text-slate-500">
-              Run your code to see the output.
-            </div>
-          )}
+    {/* Input Box */}
+    <div className="border-b border-slate-700 p-3">
+      <h3 className="text-sm text-slate-400 mb-2">
+        Program Input
+      </h3>
 
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Enter input here..."
+        className="w-full h-24 bg-slate-800 text-white rounded p-2 resize-none outline-none"
+      />
+      <div className="mt-2 flex justify-end">
+  <button
+    onClick={() => setInput("")}
+    className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm"
+  >
+    Clear Input
+  </button>
+</div>
+    </div>
+
+    {/* Output */}
+    <div className="h-52 overflow-auto">
+      {running ? (
+        <div className="p-4 text-yellow-400 animate-pulse">
+          Executing your program...
+        </div>
+      ) : output ? (
+        <pre className="p-4 text-green-400 whitespace-pre-wrap break-words font-mono">
+          {output}
+        </pre>
+      ) : (
+        <div className="h-full flex items-center justify-center text-slate-500">
+          Run your code to see the output.
         </div>
       )}
+    </div>
+
+  </div>
+)}
 
     </section>
   );

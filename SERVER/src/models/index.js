@@ -1,14 +1,28 @@
 const { sequelize } = require("../config/database");
 
-// Import all models
+// =========================
+// Import Models
+// =========================
+
 require("./user");
+
+// =========================
+// Sync Database
+// =========================
 
 const syncDB = async () => {
   try {
-    await sequelize.sync({ alter: true });
-    console.log("✅ Database synced successfully");
+    if (process.env.NODE_ENV === "development") {
+      await sequelize.sync({ alter: true });
+    } else {
+      await sequelize.sync();
+    }
+
+    console.log("✅ Database Synced Successfully");
   } catch (error) {
-    console.error("❌ Database sync failed:", error);
+    console.error("❌ Database Sync Failed");
+    console.error(error.message);
+
     throw error;
   }
 };

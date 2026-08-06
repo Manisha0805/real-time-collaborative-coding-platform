@@ -13,6 +13,10 @@ function EditorLayout({
   messages,
   typingUser,
   code,
+  
+   input,
+  setInput,
+
   output,
   running,
   battleMode,
@@ -152,10 +156,12 @@ function EditorLayout({
 
           <div className="border-t border-slate-700 bg-slate-900">
             <OutputPanel
-              output={output}
-              running={running}
-              clearOutput={clearOutput}
-            />
+  output={output}
+  running={running}
+  clearOutput={clearOutput}
+  input={input}
+  setInput={setInput}
+/>
           </div>
 
         </section>

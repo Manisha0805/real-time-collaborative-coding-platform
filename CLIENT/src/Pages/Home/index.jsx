@@ -131,7 +131,6 @@ className="w-full mb-4 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700
           <option value="c">C</option>
           <option value="python">Python</option>
           <option value="java">Java</option>
-          <option value="php">PHP</option>
         </select>
 
         {error && (

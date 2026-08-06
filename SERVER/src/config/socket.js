@@ -5,17 +5,25 @@ let io;
 // Store users of every room
 const roomUsers = {};
 
+// Store room state
+const roomState = {};
+
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: process.env.CLIENT_URL || "http://localhost:5173",
       methods: ["GET", "POST"],
       credentials: true,
     },
   });
 
   io.on("connection", (socket) => {
-    console.log(`✅ User Connected: ${socket.id}`);
+    console.log(`✅ Socket Connected: ${socket.id}`);
+
+    // Debug every incoming event
+    socket.onAny((event, ...args) => {
+      console.log(`📡 ${socket.id} -> ${event}`, args);
+    });
 
     // ==========================
     // Join Room
@@ -30,9 +38,16 @@ const initSocket = (server) => {
         roomUsers[roomId] = [];
       }
 
-      // Prevent duplicate entries
+      if (!roomState[roomId]) {
+        roomState[roomId] = {
+          code: "",
+          language: "cpp",
+        };
+      }
+
+      // Remove duplicate socket/user
       roomUsers[roomId] = roomUsers[roomId].filter(
-        (user) => user.id !== socket.id
+        (user) => user.id !== socket.id && user.username !== username,
       );
 
       roomUsers[roomId].push({
@@ -42,13 +57,21 @@ const initSocket = (server) => {
 
       io.to(roomId).emit("users-update", roomUsers[roomId]);
 
-      console.log(`${username} joined room ${roomId}`);
+      socket.emit("receive-code", roomState[roomId].code);
+      socket.emit("receive-language", roomState[roomId].language);
+
+      console.log(`👤 ${username} joined room ${roomId}`);
+      console.log(`🏠 Room ${roomId} Users: ${roomUsers[roomId].length}`);
     });
 
     // ==========================
     // Code Sync
     // ==========================
     socket.on("code-change", ({ roomId, code }) => {
+      if (roomState[roomId]) {
+        roomState[roomId].code = code;
+      }
+
       socket.to(roomId).emit("receive-code", code);
     });
 
@@ -56,6 +79,10 @@ const initSocket = (server) => {
     // Language Change
     // ==========================
     socket.on("language-change", ({ roomId, language }) => {
+      if (roomState[roomId]) {
+        roomState[roomId].language = language;
+      }
+
       socket.to(roomId).emit("receive-language", language);
     });
 
@@ -63,9 +90,8 @@ const initSocket = (server) => {
     // Typing Indicator
     // ==========================
     socket.on("typing", ({ roomId, username }) => {
-  console.log("Typing Event:", roomId, username);
-
-io.to(roomId).emit("typing", username);});
+      socket.to(roomId).emit("typing", username);
+    });
 
     // ==========================
     // Chat
@@ -82,30 +108,45 @@ io.to(roomId).emit("typing", username);});
 
       if (roomUsers[roomId]) {
         roomUsers[roomId] = roomUsers[roomId].filter(
-          (user) => user.id !== socket.id
+          (user) => user.id !== socket.id && user.username !== socket.username,
         );
 
         io.to(roomId).emit("users-update", roomUsers[roomId]);
-      }
 
-      console.log(`${socket.id} left ${roomId}`);
+        console.log(`👋 ${socket.username} left room ${roomId}`);
+        console.log(`🏠 Room ${roomId} Users: ${roomUsers[roomId].length}`);
+
+        if (roomUsers[roomId].length === 0) {
+          delete roomUsers[roomId];
+          delete roomState[roomId];
+          console.log(`🗑️ Room ${roomId} deleted`);
+        }
+      }
     });
 
     // ==========================
     // Disconnect
     // ==========================
-    socket.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
       const roomId = socket.roomId;
 
       if (roomId && roomUsers[roomId]) {
         roomUsers[roomId] = roomUsers[roomId].filter(
-          (user) => user.id !== socket.id
+          (user) => user.id !== socket.id && user.username !== socket.username,
         );
 
         io.to(roomId).emit("users-update", roomUsers[roomId]);
+
+        console.log(`🏠 Room ${roomId} Users: ${roomUsers[roomId].length}`);
+
+        if (roomUsers[roomId].length === 0) {
+          delete roomUsers[roomId];
+          delete roomState[roomId];
+          console.log(`🗑️ Room ${roomId} deleted`);
+        }
       }
 
-      console.log(`❌ User Disconnected: ${socket.id}`);
+      console.log(`❌ Socket Disconnected: ${socket.id} | Reason: ${reason}`);
     });
   });
 
