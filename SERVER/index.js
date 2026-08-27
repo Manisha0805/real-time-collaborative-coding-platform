@@ -7,7 +7,7 @@ const { connectDB } = require("./src/config/database");
 const { syncDB } = require("./src/models");
 const { initSocket } = require("./src/config/socket");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 async function startServer() {
   try {
