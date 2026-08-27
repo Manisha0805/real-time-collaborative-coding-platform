@@ -22,7 +22,17 @@ Output:
 9`,
     constraints:
       "1 ≤ N ≤ 10⁵\n1 ≤ K ≤ N\n-10⁴ ≤ arr[i] ≤ 10⁴",
+ testCases: [
+  {
+    input: "2 1 5 1 3 2\n3",
+    expectedOutput: "9",
   },
+  {
+    input: "2 3 4 1 5\n2",
+    expectedOutput: "7",
+  },
+],
+    },
 
   {
     title: "Two Sum",
@@ -258,8 +268,7 @@ Output:
 },
 ];
 
-function ProblemPanel() {
-  const [currentProblem, setCurrentProblem] = useState(0);
+function ProblemPanel({ onSubmit, loading }) {  const [currentProblem, setCurrentProblem] = useState(0);
 
   const problem = problems[currentProblem];
 
@@ -394,6 +403,14 @@ function ProblemPanel() {
           <span className="text-slate-400">
             {currentProblem + 1} / {problems.length}
           </span>
+
+<button
+  onClick={onSubmit}
+  disabled={loading}
+  className="w-full mb-3 py-3 rounded-xl bg-orange-500 hover:bg-orange-400 disabled:opacity-50 font-semibold text-white"
+>
+  {loading ? "Submitting..." : "Submit Solution"}
+</button>
 
           <button
             disabled={currentProblem === problems.length - 1}

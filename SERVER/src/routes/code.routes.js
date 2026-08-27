@@ -2,8 +2,10 @@ const express = require("express");
 
 const router = express.Router();
 
-const { runCode } = require("../controllers/code.controller");
-
+const {
+  runCode,
+  submitCode,
+} = require("../controllers/code.controller");
 // =========================
 // Code Execution Routes
 // =========================
@@ -12,7 +14,7 @@ const { runCode } = require("../controllers/code.controller");
 router.post("/run", runCode);
 
 // Future Routes
-// router.post("/submit", submitCode);
+router.post("/submit", submitCode);
 // router.get("/history/:roomId", getExecutionHistory);
 
 module.exports = router;

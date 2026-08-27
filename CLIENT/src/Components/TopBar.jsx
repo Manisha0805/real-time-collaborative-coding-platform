@@ -20,6 +20,7 @@ function TopBar({
   battleMode,
   onStartBattle,
   onEndBattle,
+  onAIReview,
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -97,6 +98,16 @@ function TopBar({
           <option value="hc-black">🖤</option>
         </select>
 
+<button
+  onClick={onAIReview}
+  className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg flex items-center gap-2"
+>
+  🤖
+  <span className="hidden sm:inline">
+    AI Review
+  </span>
+</button>
+
         <button
           onClick={onRun}
           disabled={running}
@@ -107,6 +118,8 @@ function TopBar({
             {running ? "Running..." : "Run"}
           </span>
         </button>
+
+        
 
         {battleMode ? (
           <button

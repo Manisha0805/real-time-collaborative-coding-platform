@@ -43,6 +43,16 @@ function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black flex items-center justify-center px-4">
 
       <div className="w-full max-w-md bg-slate-900/70 backdrop-blur-xl border border-slate-700 rounded-3xl shadow-2xl p-8">
+<button
+  onClick={() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  }}
+  className="float-right px-4 py-2 mb-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition"
+>
+  Logout
+</button>
 
         <h1 className="text-4xl font-bold text-center text-cyan-400">
           💻 CodeSync

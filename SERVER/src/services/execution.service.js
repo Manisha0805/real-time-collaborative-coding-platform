@@ -6,41 +6,87 @@ const docker = new Docker({
   socketPath: "//./pipe/dockerDesktopLinuxEngine",
 });
 
+// =========================
+// Execute Code
+// =========================
+
 async function executeCode(language, code, input = "") {
+  let container = null;
+
   try {
+    console.log("=================================");
+    console.log("🚀 CODE EXECUTION STARTED");
     console.log("Language:", language);
 
     const config = languageMap[language];
-    console.log("Config:", config);
 
     if (!config) {
-      throw new Error("Unsupported language");
+      throw new Error(`Unsupported language: ${language}`);
     }
 
-    console.log("Creating container...");
+    console.log("Config:", config);
 
-    const container = await docker.createContainer({
+    // =========================
+    // Create Container
+    // =========================
+
+    container = await docker.createContainer({
       Image: config.image,
+
       Cmd: [
         "bash",
         "-c",
         `
-        mkdir -p /usr/src/app &&
-        ${config.compile ? config.compile + " &&" : ""}
-        echo "${input.replace(/"/g, '\\"')}" | ${config.run}
+        set -e
+
+        mkdir -p /usr/src/app
+
+        ${
+          config.compile
+            ? `${config.compile} 2> /tmp/compile_error`
+            : "true"
+        }
+
+        ${
+          config.compile
+            ? `
+            if [ -s /tmp/compile_error ]; then
+              cat /tmp/compile_error
+              exit 1
+            fi
+            `
+            : ""
+        }
+
+        printf '%s' "$INPUT" | ${config.run}
         `,
       ],
+
       WorkingDir: "/usr/src/app",
+
+      Env: [
+        `INPUT=${input}`,
+      ],
+
       Tty: false,
+
       AttachStdout: true,
       AttachStderr: true,
+
       HostConfig: {
         NetworkMode: "none",
+
         Memory: 256 * 1024 * 1024,
+
+        AutoRemove: false,
       },
     });
 
-    console.log("Container Created:", container.id);
+    console.log("✅ Container Created:", container.id);
+
+    // =========================
+    // Prepare Source File
+    // =========================
 
     const pack = tar.pack();
 
@@ -53,39 +99,87 @@ async function executeCode(language, code, input = "") {
 
     pack.finalize();
 
-    console.log("Copying file...");
+    console.log("📁 Copying source file...");
 
     await container.putArchive(pack, {
       path: "/usr/src/app",
     });
 
-    console.log("Starting container...");
+    // =========================
+    // Start Container
+    // =========================
+
+    console.log("▶️ Starting container...");
 
     await container.start();
 
-    console.log("Waiting...");
+    // =========================
+    // Wait For Execution
+    // =========================
 
-    await container.wait();
+    console.log("⏳ Waiting for execution...");
 
-    console.log("Fetching logs...");
+    const waitPromise = container.wait();
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error("Execution timed out."));
+      }, 10000);
+    });
+
+    await Promise.race([
+      waitPromise,
+      timeoutPromise,
+    ]);
+
+    // =========================
+    // Fetch Logs
+    // =========================
+
+    console.log("📤 Fetching output...");
 
     const logs = await container.logs({
       stdout: true,
       stderr: true,
     });
 
-    await container.remove({ force: true });
-
-    return logs
+    let output = logs
       .toString("utf8")
       .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
       .trim();
 
+    console.log("Output:", output);
+
+    console.log("✅ CODE EXECUTION FINISHED");
+
+    return output;
   } catch (err) {
     console.error("========== DOCKER ERROR ==========");
-    console.error(err);
+    console.error(err.message);
     console.error("==================================");
+
     throw err;
+  } finally {
+    // =========================
+    // Cleanup Container
+    // =========================
+
+    if (container) {
+      try {
+        console.log("🧹 Removing container...");
+
+        await container.remove({
+          force: true,
+        });
+
+        console.log("✅ Container Removed");
+      } catch (cleanupError) {
+        console.error(
+          "Container cleanup failed:",
+          cleanupError.message
+        );
+      }
+    }
   }
 }
 

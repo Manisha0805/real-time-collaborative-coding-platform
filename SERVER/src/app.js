@@ -3,7 +3,11 @@ const cors = require("cors");
 
 const authRoutes = require("./routes/auth.routes");
 const codeRoutes = require("./routes/code.routes");
-
+const userRoutes = require("./routes/user.routes");
+const roomRoutes = require("./routes/room.routes");
+const submissionRoutes = require("./routes/submission.routes");
+const battleRoutes = require("./routes/battle.routes");
+const aiRoutes = require("./routes/ai.routes");
 const app = express();
 
 // =========================
@@ -26,7 +30,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/code", codeRoutes);
-
+app.use("/api/users", userRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/submissions", submissionRoutes);
+app.use("/api/battles", battleRoutes);
+app.use("/api/ai", aiRoutes);
 // =========================
 // Health Check
 // =========================

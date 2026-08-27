@@ -1,10 +1,12 @@
+import { useState } from "react";
+
 import TopBar from "../../Components/TopBar";
 import CodeEditor from "../../Components/CodeEditor";
 import Sidebar from "../../Components/Sidebar";
 import OutputPanel from "../../Components/OutputPanel";
 import BattleHeader from "../../Components/BattleHeader";
 import ProblemPanel from "../../Components/ProblemPanel";
-
+import AIReview from "../../Components/AI/AIReview";
 function EditorLayout({
   roomId,
   language,
@@ -21,6 +23,8 @@ function EditorLayout({
   running,
   battleMode,
   timeLeft,
+  handleBattleSubmit,
+  battleResult,
 
   chatBanner,
   unreadCount,
@@ -38,10 +42,52 @@ function EditorLayout({
   handleStartBattle,
   handleEndBattle,
   handleLeave,
-}) {
+})
+
+{
+  const [showAIReview, setShowAIReview] = useState(false);
   return (
     <div className="h-screen flex flex-col bg-slate-900 text-slate-100">
+     {battleResult && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 text-center shadow-2xl">
 
+      {battleResult === "winner" ? (
+        <>
+          <div className="text-6xl mb-4">🏆</div>
+
+          <h1 className="text-3xl font-bold text-yellow-400">
+            You Won!
+          </h1>
+
+          <p className="text-slate-400 mt-2">
+            Congratulations! You solved the problem first.
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="text-6xl mb-4">😔</div>
+
+          <h1 className="text-3xl font-bold text-red-400">
+            You Lost!
+          </h1>
+
+          <p className="text-slate-400 mt-2">
+            Your opponent solved the problem first.
+          </p>
+        </>
+      )}
+
+      <button
+        onClick={handleEndBattle}
+        className="mt-6 px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-400 font-semibold"
+      >
+        End Battle
+      </button>
+
+    </div>
+  </div>
+)}
       {/* ================= Notification ================= */}
 
       {chatBanner && (
@@ -87,7 +133,10 @@ function EditorLayout({
         battleMode={battleMode}
         onStartBattle={handleStartBattle}
         onEndBattle={handleEndBattle}
+        onAIReview={() => setShowAIReview(true)}
+      
       />
+
 
       <BattleHeader
         battleMode={battleMode}
@@ -95,6 +144,14 @@ function EditorLayout({
         participants={users.length}
         timeLeft={timeLeft}
       />
+     {showAIReview && (
+   <AIReview
+    language={language}
+    code={code}
+    onBack={() => setShowAIReview(false)}
+  />
+
+)}
 
       {/* ================= Main Layout ================= */}
 
@@ -170,7 +227,10 @@ function EditorLayout({
 
         {battleMode ? (
           <aside className="border-l border-slate-700 bg-slate-900 overflow-hidden">
-            <ProblemPanel />
+<ProblemPanel
+  onSubmit={handleBattleSubmit}
+  loading={running}
+/>
           </aside>
         ) : (
           <aside className="hidden xl:flex items-center justify-center border-l border-slate-700 bg-slate-900">
@@ -194,10 +254,19 @@ function EditorLayout({
 
             </div>
 
+            {showAIReview && (
+  <AIReview
+    language={language}
+    code={code}
+    onClose={() => setShowAIReview(false)}
+  />
+)}
+
           </aside>
         )}
       </main>
     </div>
+
   );
 }
 
