@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = "https://real-time-collaborative-coding-platform-8rvo.onrender.com";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
 export const socket = io(SOCKET_URL, {
   autoConnect: false,

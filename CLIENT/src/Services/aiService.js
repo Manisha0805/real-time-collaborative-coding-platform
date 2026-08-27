@@ -1,4 +1,4 @@
-const API_URL = "https://real-time-collaborative-coding-platform-8rvo.onrender.com/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const reviewCodeWithAI = async (language, code) => {
   const response = await fetch(`${API_URL}/ai/review`, {

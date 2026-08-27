@@ -331,8 +331,8 @@ function EditorLogic() {
 
     try {
       const response = await fetch(
-        "https://real-time-collaborative-coding-platform-8rvo.onrender.com/api/code/run",
-        {
+     `${import.meta.env.VITE_API_URL}/code/run`,    
+    {
           method: "POST",
 
           headers: {
@@ -435,8 +435,8 @@ function EditorLogic() {
 
     try {
       const response = await fetch(
-        "https://real-time-collaborative-coding-platform-8rvo.onrender.com/api/code/submit",
-        {
+      `${import.meta.env.VITE_API_URL}/code/submit`,     
+         {
           method: "POST",
 
           headers: {
