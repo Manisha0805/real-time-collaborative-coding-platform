@@ -331,7 +331,7 @@ function EditorLogic() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/code/run",
+        "https://real-time-collaborative-coding-platform-8rvo.onrender.com/api/code/run",
         {
           method: "POST",
 
@@ -435,7 +435,7 @@ function EditorLogic() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/code/submit",
+        "https://real-time-collaborative-coding-platform-8rvo.onrender.com/api/code/submit",
         {
           method: "POST",
 

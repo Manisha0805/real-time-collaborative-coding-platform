@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://real-time-collaborative-coding-platform-8rvo.onrender.com/api";
 
 export const reviewCodeWithAI = async (language, code) => {
   const response = await fetch(`${API_URL}/ai/review`, {
