@@ -295,4 +295,5 @@ module.exports = {
   getRoomDetails,
   getRoomMembers,
   closeRoom,
+  joinRoom,
 };

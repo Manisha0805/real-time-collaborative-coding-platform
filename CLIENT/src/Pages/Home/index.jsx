@@ -14,22 +14,62 @@ function Home() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
   };
 
-  const handleSubmit = () => {
-    if (!username.trim()) {
-      setError("Please enter your name.");
-      return;
+  const handleSubmit = async () => {
+  if (!username.trim()) {
+    setError("Please enter your name.");
+    return;
+  }
+
+  if (isJoin && !roomId.trim()) {
+    setError("Please enter the Room ID.");
+    return;
+  }
+
+  setError("");
+
+  const id = isJoin
+    ? roomId.trim().toUpperCase()
+    : generateRoomId();
+
+  try {
+    if (!isJoin) {
+const storedUser = localStorage.getItem("user");
+
+if (!storedUser) {
+  setError("Session expired. Please login again.");
+  navigate("/login");
+  return;
+}
+
+const user = JSON.parse(storedUser);
+
+if (!user?.id) {
+  setError("User session is invalid. Please login again.");
+  navigate("/login");
+  return;
+}
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/rooms`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            roomCode: id,
+            language,
+            createdBy: user.id,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create room.");
+      }
     }
-
-    if (isJoin && !roomId.trim()) {
-      setError("Please enter the Room ID.");
-      return;
-    }
-
-    setError("");
-
-    const id = isJoin
-      ? roomId.trim().toUpperCase()
-      : generateRoomId();
 
     navigate(`/editor/${id}`, {
       state: {
@@ -37,8 +77,11 @@ function Home() {
         language,
       },
     });
-  };
-
+  } catch (error) {
+    console.error("Room Error:", error);
+    setError(error.message || "Failed to create room.");
+  }
+};
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black flex items-center justify-center px-4">
 
