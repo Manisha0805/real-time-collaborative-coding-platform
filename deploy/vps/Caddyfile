@@ -1,0 +1,19 @@
+# Automatic HTTPS for $DOMAIN (Let's Encrypt). Point the domain's A record at this VPS first.
+{$DOMAIN} {
+  encode gzip
+
+  # REST API and Socket.IO (WebSocket upgrades are proxied automatically)
+  handle /api/* {
+    reverse_proxy server:5000
+  }
+  handle /socket.io/* {
+    reverse_proxy server:5000
+  }
+
+  # React single-page app: unknown paths fall back to index.html
+  handle {
+    root * /srv
+    try_files {path} /index.html
+    file_server
+  }
+}

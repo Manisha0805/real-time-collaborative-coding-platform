@@ -1,0 +1,50 @@
+{
+  "name": "real_time_collab_server",
+  "version": "1.1.0",
+  "description": "Backend for Real-Time Collaborative Coding Platform",
+  "main": "index.js",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "test": "node --test",
+    "pull-images": "node scripts/pull-runner-images.js",
+    "smoke:exec": "node scripts/smoke-execution.js"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "socket.io",
+    "sequelize",
+    "mysql",
+    "realtime",
+    "collaboration",
+    "code-editor"
+  ],
+  "author": "Manisha",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.18.0",
+    "axios": "^1.18.1",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dockerode": "^5.0.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.0.0",
+    "firebase-admin": "^14.2.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.23.1",
+    "real_time_collaboration": "file:..",
+    "sequelize": "^6.37.8",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "socket.io-client": "^4.8.3"
+  }
+}

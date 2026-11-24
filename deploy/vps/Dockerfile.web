@@ -1,0 +1,20 @@
+# Builds the React app and serves it with Caddy (HTTPS + reverse proxy to the API).
+# Build context: the repository root (see docker-compose.yml).
+FROM node:22-slim AS build
+WORKDIR /app
+COPY CLIENT/package.json CLIENT/package-lock.json ./
+RUN npm ci
+COPY CLIENT/ .
+ARG VITE_API_URL
+ARG VITE_SOCKET_URL
+ARG VITE_FIREBASE_API_KEY
+ARG VITE_FIREBASE_AUTH_DOMAIN
+ARG VITE_FIREBASE_PROJECT_ID
+ARG VITE_FIREBASE_STORAGE_BUCKET
+ARG VITE_FIREBASE_MESSAGING_SENDER_ID
+ARG VITE_FIREBASE_APP_ID
+RUN npm run build
+
+FROM caddy:2
+COPY --from=build /app/dist /srv
+COPY deploy/vps/Caddyfile /etc/caddy/Caddyfile

@@ -1,0 +1,7 @@
+# Normalise line endings (the original project mixed CRLF and LF, which made every diff noisy
+# and breaks shell scripts on Linux).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary

@@ -1,0 +1,84 @@
+# ALL-IN-ONE single-VPS deployment: web (static frontend + HTTPS reverse proxy), API server, MySQL.
+# Code runs in sandbox containers on this same host (EXECUTION_PROVIDER=docker).
+#
+#   cp .env.example .env   # fill in (see comments), then:
+#   docker compose up -d --build
+#   docker compose exec server npm run pull-images     # one-time: download the language images
+#   docker compose exec server npm run smoke:exec      # verify execution + isolation
+#
+# SECURITY NOTE: the API server is given the host's Docker socket so it can start sandbox
+# containers. Anyone who could exploit the API process would then control the host's Docker.
+# If that is not acceptable, run Judge0 on a separate VM instead (../judge0) and set
+# EXECUTION_PROVIDER=judge0 + JUDGE0_URL below (and remove the docker.sock mount).
+name: rtc
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?}
+      MYSQL_DATABASE: real_time_collab
+      MYSQL_USER: rtc
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: ../../SERVER
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "5000"
+      TRUST_PROXY: "1"
+      CLIENT_URL: https://${DOMAIN:?}
+      JWT_SECRET: ${JWT_SECRET:?}
+      DB_HOST: mysql
+      DB_USER: rtc
+      DB_PASSWORD: ${MYSQL_PASSWORD:?}
+      DB_NAME: real_time_collab
+      EXECUTION_PROVIDER: docker
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      FIREBASE_SERVICE_ACCOUNT_B64: ${FIREBASE_SERVICE_ACCOUNT_B64:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # The container user must be allowed to use the socket: set DOCKER_GID=$(getent group docker | cut -d: -f3)
+    group_add:
+      - "${DOCKER_GID:?set DOCKER_GID in .env}"
+
+  web:
+    build:
+      context: ../..            # repo root, so the Dockerfile can also copy deploy/vps/Caddyfile
+      dockerfile: deploy/vps/Dockerfile.web
+      args:
+        VITE_API_URL: https://${DOMAIN}/api
+        VITE_SOCKET_URL: https://${DOMAIN}
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-}
+        VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET:-}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID:-}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-}
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      - server
+
+volumes:
+  mysql_data:
+  caddy_data:

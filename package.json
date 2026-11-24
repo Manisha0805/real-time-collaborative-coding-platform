@@ -1,0 +1,21 @@
+{
+  "name": "real_time_collaboration",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Real-Time Collaborative Coding Platform (React + Express + Socket.IO + MySQL)",
+  "scripts": {
+    "install:all": "npm install && npm --prefix SERVER install && npm --prefix CLIENT install",
+    "client": "npm --prefix CLIENT run dev",
+    "server": "npm --prefix SERVER run dev",
+    "dev": "concurrently -n server,client -c blue,green \"npm run server\" \"npm run client\"",
+    "build": "npm --prefix CLIENT run build",
+    "lint": "npm --prefix CLIENT run lint",
+    "test": "npm --prefix SERVER test",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d",
+    "db:down": "docker compose -f docker-compose.dev.yml down"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.2.3"
+  }
+}

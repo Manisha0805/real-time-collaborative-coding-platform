@@ -1,0 +1,43 @@
+# Judge0 configuration - copy to judge0.conf and replace every CHANGE_ME.
+# Generate each secret with:  openssl rand -hex 32
+# Key names/units follow the official judge0.conf of release v1.13.1.
+
+# ---- Authentication (REQUIRED - Judge0 is open to the world when AUTHN_TOKEN is empty) ----
+AUTHN_HEADER=X-Auth-Token
+AUTHN_TOKEN=CHANGE_ME
+# Protects Judge0's admin endpoints (not used by this project)
+AUTHZ_HEADER=X-Judge0-User
+AUTHZ_TOKEN=CHANGE_ME
+
+# Optional extra layer: accept requests only from your backend's public IP(s)
+# ALLOW_IP="203.0.113.10"
+
+# ---- Backing services ----
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=CHANGE_ME
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+POSTGRES_DB=judge0
+POSTGRES_USER=judge0
+POSTGRES_PASSWORD=CHANGE_ME
+SECRET_KEY_BASE=CHANGE_ME
+
+# ---- Reduce attack surface (this project does not need these features) ----
+ENABLE_COMPILER_OPTIONS=false
+ENABLE_COMMAND_LINE_ARGUMENTS=false
+ENABLE_CALLBACKS=false
+ENABLE_ADDITIONAL_FILES=false
+ENABLE_SUBMISSION_DELETE=false
+ENABLE_WAIT_RESULT=false
+ENABLE_NETWORK=false
+ALLOW_ENABLE_NETWORK=false
+
+# ---- Resource limits (time in seconds, memory/file sizes in kilobytes) ----
+MAX_CPU_TIME_LIMIT=10
+MAX_WALL_TIME_LIMIT=30
+MAX_MEMORY_LIMIT=512000
+MAX_FILE_SIZE=1024
+# Default processes/threads per submission is 60; the JVM needs more headroom
+MAX_PROCESSES_AND_OR_THREADS=120
+MAX_QUEUE_SIZE=100

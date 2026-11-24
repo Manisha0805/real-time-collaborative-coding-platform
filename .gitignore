@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+*.log
+
+# secrets - never commit these
+.env
+.env.*
+!.env.example
+judge0.conf
+firebase-service-account*.json
+*.pem
+*.key

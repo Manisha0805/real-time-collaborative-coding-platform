@@ -1,0 +1,69 @@
+# Judge0 CE v1.13.1 - the isolated code-execution service.
+#   (>= 1.13.1 is required: earlier versions have critical sandbox-escape vulnerabilities.)
+#
+# Run this on its OWN Linux VM (not on the machine that runs your web app).
+# Requirements: Docker + Docker Compose, and **cgroup v1** (see ../../docs/DEPLOYMENT.md).
+#
+#   cp judge0.conf.example judge0.conf       # then fill in the 4 secrets
+#   cp .env.example .env                     # set JUDGE0_DOMAIN
+#   docker compose up -d db redis && sleep 10 && docker compose up -d
+#
+# Based on the official docker-compose.yml shipped with the Judge0 v1.13.1 release,
+# plus a Caddy container that adds HTTPS (so your X-Auth-Token is never sent in clear text).
+x-logging: &default-logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100M
+
+services:
+  server:
+    image: judge0/judge0:1.13.1
+    volumes:
+      - ./judge0.conf:/judge0.conf:ro
+    privileged: true            # required by Judge0's isolate sandbox
+    <<: *default-logging
+    restart: always
+    # not published: only Caddy (below) can reach it
+
+  workers:
+    image: judge0/judge0:1.13.1
+    command: ["./scripts/workers"]
+    volumes:
+      - ./judge0.conf:/judge0.conf:ro
+    privileged: true
+    <<: *default-logging
+    restart: always
+
+  db:
+    image: postgres:16.2
+    env_file: judge0.conf
+    volumes:
+      - data:/var/lib/postgresql/data/
+    <<: *default-logging
+    restart: always
+
+  redis:
+    image: redis:7.2.4
+    command: ["bash", "-c", 'docker-entrypoint.sh --appendonly no --requirepass "$$REDIS_PASSWORD"']
+    env_file: judge0.conf
+    <<: *default-logging
+    restart: always
+
+  caddy:
+    image: caddy:2
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      JUDGE0_DOMAIN: ${JUDGE0_DOMAIN:?set JUDGE0_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - server
+
+volumes:
+  data:
+  caddy_data:
